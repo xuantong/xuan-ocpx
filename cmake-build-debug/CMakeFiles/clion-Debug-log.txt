@@ -1,0 +1,3 @@
+/usr/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" -S /home/ubuntu/workspace/xuanOcpx -B /home/ubuntu/workspace/xuanOcpx/cmake-build-debug
+CMake Error: The source directory "/home/ubuntu/workspace/xuanOcpx" does not appear to contain CMakeLists.txt.
+Specify --help for usage, or press the help button on the CMake GUI.
