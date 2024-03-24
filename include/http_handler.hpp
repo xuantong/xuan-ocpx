@@ -7,7 +7,6 @@
 
 #include "hv/HttpService.h"
 #include "hv/json.hpp"
-#include "config.hpp"
 #include <string>
 #include "hv/hbase.h"
 #include "hv/htime.h"
@@ -65,11 +64,6 @@ class HttpHandler {
     // 记录数据请求
     logger_.info("client ip:{},port:{}", req->client_addr.ip.c_str(), req->client_addr.port);
     return HTTP_STATUS_NEXT;
-  }
-
-  static std::string genAuthKey() {
-    return HttpHandler::genAuthKey(
-        ConfigManager::GetConfig().user + ConfigManager::GetConfig().pwd + randomString(10));
   }
 
   static std::string genAuthKey(std::string str) {
