@@ -6,7 +6,8 @@
 logpp::Logger TracerHttpHandler::logger_ = logpp::Logger("TracerHttpHandler");
 
 int TracerHttpHandler::tracer(HttpRequest *req, HttpResponse *resp) {
-    req->query_params;
-    req->url;
+    logger_.info("TracerHttpHandler tracer");
+    // 转换出对应对象数据
+    TracerReq tracerReq = extractTracerReq(*req);
     return 0;
 }

@@ -124,8 +124,7 @@ struct TracerReq {
 };
 
 
-// 静态工具类
-static TracerReq extractData(HttpRequest &req) {
+TracerReq extractTracerReq(HttpRequest &req) {
     TracerReq data;
     // cqid和action_id是必传参数，如果没有提供，抛出异常
     data.cqid = req.GetParam("cqid");
@@ -167,9 +166,10 @@ static TracerReq extractData(HttpRequest &req) {
 }
 
 class TracerHttpHandler {
-    private:
-        static logpp::Logger logger_;
-    public:
-        static int tracer(HttpRequest *req, HttpResponse *resp);
+private:
+    static logpp::Logger logger_;
+public:
+    static int tracer(HttpRequest *req, HttpResponse *resp);
 };
+
 #endif //XUANOCPX_TRACER_HTTP_HANDLER_H
