@@ -13,7 +13,7 @@
 
 class LevelDBWrapper {
  public:
-  LevelDBWrapper(const std::string &db_path) {
+  explicit LevelDBWrapper(const std::string &db_path) {
     leveldb::Options options;
     options.create_if_missing = true; // 默认创建
     //写操作首先会被写入内存中的缓冲区，达到一定大小后再统一写入磁盘。读多写少的场景不需要太大的写缓冲区。
@@ -71,7 +71,7 @@ class LevelDBWrapper {
   }
 
  private:
-  leveldb::DB *db_;
+  leveldb::DB *db_{};
 };
 
 #endif //XUANOCPX_INCLUDE_LEVELDBWRAPPER_HPP_

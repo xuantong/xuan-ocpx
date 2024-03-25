@@ -17,10 +17,12 @@ add_executable(main_test
         macro_variable_util_test.cpp
         leveldb_wrapper_test.cpp
         string_utils_test.cpp
+        enum_util_test.cpp
 )
 
 # 将 main_test 可执行文件与我们的数学函数库以及预编译的GTest和GMock库进行链接。
 target_link_libraries(main_test
+        xuanOcpx_core
         GTest::GTest
         GTest::Main
         OpenSSL::SSL

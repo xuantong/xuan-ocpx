@@ -4,7 +4,7 @@
 #include "leveldb_wrapper.hpp"
 #include <gtest/gtest.h>
 #include <filesystem>
-#include "string_utils.hpp"
+#include "string_utils.h"
 
 namespace {
 

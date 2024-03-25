@@ -8,7 +8,7 @@
 #include <stdexcept>
 #include <string>
 
-void checkCondition(bool condition, const std::string &errorMessage) {
+inline void checkCondition(bool condition, const std::string &errorMessage) {
     if (!condition) {
         throw std::runtime_error(errorMessage);
     }

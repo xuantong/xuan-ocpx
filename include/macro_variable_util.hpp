@@ -4,17 +4,14 @@
 
 #ifndef XUANOCPX_INCLUDE_MACROVARIABLEUTIL_HPP_
 #define XUANOCPX_INCLUDE_MACROVARIABLEUTIL_HPP_
+#pragma once
+
 #include <string>
 #include <unordered_map>
 #include <iostream>
 #include <algorithm>
 #include <random>
 
-// 假设的辅助函数和类，需要实际实现
-std::string encode(const std::string &value) {
-  // 对 value 进行编码，具体实现依赖于编码的要求
-  return value;
-}
 
 bool isMacroVariable(const std::string &value) {
   // 判断是否是宏变量，具体实现依赖于宏变量的定义
