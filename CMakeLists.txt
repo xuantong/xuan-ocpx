@@ -24,8 +24,16 @@ message(STATUS "libhv: ${LIBHV}")
 # logpp
 find_library(LOGPP NAMES logpp PATHS /usr/local/lib REQUIRED)
 
+# Hiredis
+find_library(HIREDIS_LIBRARY NAMES hiredis PATHS /usr/lib/x86_64-linux-gnu)
+if(NOT HIREDIS_LIBRARY)
+    message(FATAL_ERROR "Hiredis library not found")
+endif()
+
+
 include_directories(
         /usr/local/include
+        /usr/include
         ${CMAKE_SOURCE_DIR}/include
         ${Nlohmann_INCLUDE_DIRS}
         ${LEVELDB_INCLUDE_PATH}

@@ -12,6 +12,7 @@ target_link_libraries(xuanOcpx_core
         OpenSSL::Crypto
         Threads::Threads
         ${LEVELDB_LIBRARY}
+        ${HIREDIS_LIBRARY}
 )
 
 # 创建可执行文件  
