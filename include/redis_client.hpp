@@ -17,7 +17,8 @@ public:
     static constexpr int ONE_HOUR = 60 * 60;
     static constexpr int ONE_DAY = 24 * 60 * 60;
 
-    RedisClient(const std::string &host, int port, int db = 0) : host_(host), port_(port), db_(db) {
+    RedisClient(const std::string &host, int port, std::string passwd = "iovIYbyvAamvqXIeZyXZovdn0rXZwKhk", int db = 0)
+            : host_(host), port_(port), passwd_(passwd), db_(db) {
         _connect();
     }
 
@@ -72,14 +73,29 @@ private:
                 std::cerr << "Connection error: can't allocate redis context" << std::endl;
             }
         } else {
-            // 选择数据库
-            redisReply *reply = (redisReply *) redisCommand(context_, "SELECT %d", db_);
-            if (reply == nullptr || context_->err) {
-                std::cerr << "Failed to select database: " << db_ << std::endl;
-                redisFree(context_);
-                context_ = nullptr;
+            // 如果提供了密码，进行认证
+            if (!passwd_.empty()) {
+                redisReply *auth_reply = (redisReply *) redisCommand(context_, "AUTH %s", passwd_.c_str());
+                if (auth_reply == nullptr || context_->err || auth_reply->type == REDIS_REPLY_ERROR) {
+                    std::cerr << "Authentication failed" << std::endl;
+                    if (auth_reply) {
+                        std::cerr << auth_reply->str << std::endl;
+                    }
+                    redisFree(context_);
+                    context_ = nullptr;
+                }
+                freeReplyObject(auth_reply);
             }
-            freeReplyObject(reply);
+            if (context_) {
+                // 选择数据库
+                redisReply *reply = (redisReply *) redisCommand(context_, "SELECT %d", db_);
+                if (reply == nullptr || context_->err) {
+                    std::cerr << "Failed to select database: " << db_ << std::endl;
+                    redisFree(context_);
+                    context_ = nullptr;
+                }
+                freeReplyObject(reply);
+            }
         }
     }
 
@@ -87,6 +103,7 @@ private:
     std::string host_;
     int port_;
     int db_;
+    std::string passwd_;
 };
 
 #endif //XUANOCPX_INCLUDE_REDIS_CLIENT_HPP_

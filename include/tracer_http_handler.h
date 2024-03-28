@@ -72,6 +72,12 @@ enum class OSType {
     Android = 2
 };
 
+enum class BizType {
+    ELEME_CPS = 0,
+    ELEME_FIRST_CALL = 1,
+    MEITUAN_OCPA = 2
+};
+
 /**
  * tracer 请求对象，标准数据请求
  */
@@ -124,6 +130,21 @@ struct TracerReq {
     std::string ua;
     // req_get_uri ,当此请求完整的url地址
     std::string url;
+};
+
+/**
+ * 数据回调的结构体
+ */
+struct TracerCall {
+    // 此数据为源请求对应的hash值
+    std::string id;
+    std::string event_type;
+    std::string biz_type; //回调的具体业务类型
+    std::string transform_type; //
+    std::string event_time; //对应为细节
+
+    std::string ip; //ip地址
+
 };
 
 // 为TracerReq结构体定义到json的转换
@@ -228,10 +249,12 @@ class TracerHttpHandler {
 private:
     static logpp::Logger logger_;
     LevelDBWrapper &level_db_wrapper_;
+    RedisClient &redisClient_;
 
 
 public:
-    TracerHttpHandler(LevelDBWrapper &level_db_wrapper) : level_db_wrapper_(level_db_wrapper) {}
+    TracerHttpHandler(LevelDBWrapper &level_db_wrapper, RedisClient &redisClient) : level_db_wrapper_(level_db_wrapper),
+                                                                                    redisClient_(redisClient) {}
 
     ~TracerHttpHandler() = default;
 

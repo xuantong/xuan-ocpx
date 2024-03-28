@@ -10,8 +10,10 @@ protected:
 
     // 在每个测试用例前执行
     void SetUp() override {
-        // 连接到本地的Redis服务，确保Redis服务在默认端口6379上运行
-        client = new RedisClient("127.0.0.1", 6379);
+        // 连接到本地的Redis服务，确保Redis服务在默认端口16399上运行
+        client = new RedisClient("127.0.0.1", 16399);
+        // 清理Redis数据库
+        client->set("FLUSHALL", "");
     }
 
     // 在每个测试用例后执行
