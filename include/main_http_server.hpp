@@ -20,6 +20,7 @@
 #include "global_http_handler.hpp"
 #include "string_utils.h"
 #include "tracer_http_handler.h"
+#include "redis_client.hpp"
 
 using json = nlohmann::json;
 
@@ -53,6 +54,17 @@ void signal_handler(int signal) {
     g_terminate = 1;
   }
 }
+
+// 创建一个 const std::function 对象来存储 lambda 表达式
+const std::function<int(const std::string &)> string2ints_converter = [](const std::string &s) -> int {
+    return std::stoi(s);
+};
+
+// 字符串转换器，实际上对于字符串到字符串的转换，可以直接返回输入的字符串本身
+const std::function<string(const std::string &)> string2string_converter = [](
+        const std::string &str) -> std::string {
+    return str;
+};
 
 /**
  * 启动一个http服务
@@ -92,23 +104,17 @@ void http_server(int argc, char **argv) {
     return resp->String("pong");
   });
 
-  // 创建一个 const std::function 对象来存储 lambda 表达式
-  const std::function<int(const std::string &)> string2ints_converter = [](const std::string &s) -> int {
-    return std::stoi(s);
-  };
-
-  // 字符串转换器，实际上对于字符串到字符串的转换，可以直接返回输入的字符串本身
-  const std::function<string(const std::string &)> string2string_converter = [](
-      const std::string &str) -> std::string {
-    return str;
-  };
-
   LevelDBWrapper level_db_wrapper(db_path);
+  RedisClient redisUtil("",1234);
   TracerHttpHandler tracer_http_handler(level_db_wrapper);
   // tracer请求链接
   router.GET("/tracer", [&tracer_http_handler](HttpRequest *req, HttpResponse *resp) {
     return tracer_http_handler.tracer(req, resp);
   });
+
+    router.GET("/callback", [&tracer_http_handler](HttpRequest *req, HttpResponse *resp) {
+        return tracer_http_handler.callback(req, resp);
+    });
 
 
   // 创建并启动HTTP服务器

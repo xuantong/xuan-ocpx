@@ -15,6 +15,6 @@ TEST(EnumUtil, StringToEnum) {
               ActionType::CallBack);
     EXPECT_EQ(EnumUtil::StringToEnum("4", ActionType::Unknown, VALID_ACTIONTYPE_VALUES),
               ActionType::Unknown);
-    EXPECT_EQ(EnumUtil::StringToEnum(randomString(5), ActionType::Unknown, VALID_ACTIONTYPE_VALUES),
+    EXPECT_EQ(EnumUtil::StringToEnum(string_utils::randomString(5), ActionType::Unknown, VALID_ACTIONTYPE_VALUES),
               ActionType::Unknown);
 }

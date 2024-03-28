@@ -19,6 +19,8 @@ add_executable(main_test
         string_utils_test.cpp
         enum_util_test.cpp
         cache_manager_test.cpp
+        hash_utils_test.cpp
+        redis_client_test.cpp
 )
 
 # 将 main_test 可执行文件与我们的数学函数库以及预编译的GTest和GMock库进行链接。

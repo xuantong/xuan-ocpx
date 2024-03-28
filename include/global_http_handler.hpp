@@ -67,8 +67,8 @@ public :
     }
 
     static std::string genAuthKey(std::string str) {
-        std::string genKey = generateMD5HashWithInterleavedSalt(
-                str, DEFAULT_SLAT_STRING
+        std::string genKey = string_utils::generateMD5HashWithInterleavedSalt(
+                str, string_utils::DEFAULT_SLAT_STRING
         );
         //将生成时间插入
         hashTimestamps_.insert({genKey, std::chrono::system_clock::now()});

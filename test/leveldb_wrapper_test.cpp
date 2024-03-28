@@ -34,8 +34,8 @@ class LevelDBWrapperTest : public ::testing::Test {
 
 // 测试Put和Get方法。
 TEST_F(LevelDBWrapperTest, PutAndGet) {
-  std::string key = randomString(10);
-  std::string value = randomString(12);
+  std::string key = string_utils::randomString(10);
+  std::string value = string_utils::randomString(12);
 
   // 测试Put方法。
   EXPECT_NO_THROW(db_wrapper->Put(key, value));
@@ -48,8 +48,8 @@ TEST_F(LevelDBWrapperTest, PutAndGet) {
 
 // 测试Delete方法。
 TEST_F(LevelDBWrapperTest, Delete) {
-  std::string key = randomString(10);
-  std::string value = randomString(12);
+  std::string key = string_utils::randomString(10);
+  std::string value = string_utils::randomString(12);
 
   // 先插入一个键值对。
   db_wrapper->Put(key, value);

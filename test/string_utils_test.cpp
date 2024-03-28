@@ -4,6 +4,7 @@
 #include <gtest/gtest.h>
 #include "string_utils.h"
 
+using namespace string_utils;
 // 测试URL编码函数
 TEST(string_utils_test, urlEncode) {
     std::string original = "This is a test: 1+2 = 3!";
