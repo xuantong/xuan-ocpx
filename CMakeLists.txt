@@ -26,44 +26,43 @@ find_library(LOGPP NAMES logpp PATHS /usr/local/lib REQUIRED)
 
 # Hiredis
 find_library(HIREDIS_LIBRARY NAMES hiredis PATHS /usr/lib/x86_64-linux-gnu)
-if(NOT HIREDIS_LIBRARY)
+if (NOT HIREDIS_LIBRARY)
     message(FATAL_ERROR "Hiredis library not found")
-endif()
+endif ()
 
 # proto
 find_package(Protobuf REQUIRED)
 # 如果 Protobuf 找到了，包含 Protobuf 的 CMake 函数
-if(PROTOBUF_FOUND)
+if (PROTOBUF_FOUND)
     message(STATUS "Protobuf version : ${Protobuf_VERSION}")
     include_directories(${PROTOBUF_INCLUDE_DIRS})
     include_directories(${CMAKE_CURRENT_BINARY_DIR})
-else()
+else ()
     message(FATAL_ERROR "Cannot find Protobuf library.")
-endif()
+endif ()
 
 # 设置 proto 文件
-set(PROTO_FILES
-        ${CMAKE_SOURCE_DIR}/protos/tracer_req.proto
-        ${CMAKE_SOURCE_DIR}/protos/tracer_callback.proto
-)
+file(GLOB PROTO_FILES "${CMAKE_CURRENT_SOURCE_DIR}/protos/*.proto")
+#protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
+
 message(STATUS "PROTO_FILES is ${PROTO_FILES}")
-#PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
+
 # 手动调用protoc编译器生成Proto源文件和头文件
-foreach(PROTO_FILE ${PROTO_FILES})
+foreach (PROTO_FILE ${PROTO_FILES})
     get_filename_component(PROTO_NAME_WE ${PROTO_FILE} NAME_WE)
     set(PROTO_SRC "${CMAKE_CURRENT_BINARY_DIR}/${PROTO_NAME_WE}.pb.cc")
     set(PROTO_HDR "${CMAKE_CURRENT_BINARY_DIR}/${PROTO_NAME_WE}.pb.h")
+    set(PROTOC_COMMAND "${PROTOBUF_PROTOC_EXECUTABLE} --cpp_out ${CMAKE_CURRENT_BINARY_DIR} --proto_path ${CMAKE_CURRENT_SOURCE_DIR}/protos ${PROTO_FILE}")
+    message(STATUS "Protoc Command: ${PROTOC_COMMAND}")
+
     add_custom_command(
-            OUTPUT "${PROTO_SRC}" "${PROTO_HDR}"
-            COMMAND ${PROTOBUF_PROTOC_EXECUTABLE} --cpp_out "${CMAKE_CURRENT_BINARY_DIR}" -I "${CMAKE_SOURCE_DIR}" "${PROTO_FILE}"
-            DEPENDS "${PROTO_FILE}"
+            OUTPUT ${PROTO_SRC} ${PROTO_HDR}
+            COMMAND ${PROTOC_COMMAND}
+            DEPENDS ${PROTO_FILE}
             COMMENT "Running C++ protocol buffer compiler on ${PROTO_FILE}"
             VERBATIM
     )
-endforeach()
-
-message(STATUS "Generated .pb.cc file: ${PROTO_SRC}")
-message(STATUS "Generated .pb.h file: ${PROTO_HDR}")
+endforeach ()
 
 include_directories(
         /usr/local/include
@@ -71,8 +70,8 @@ include_directories(
         ${CMAKE_SOURCE_DIR}/include
         ${Nlohmann_INCLUDE_DIRS}
         ${LEVELDB_INCLUDE_PATH}
-        # 包含生成的*.pb.h文件的目录
         ${Protobuf_INCLUDE_DIRS}
+        # 包含生成的*.pb.h文件的目录
         ${CMAKE_CURRENT_BINARY_DIR}
 )
 
