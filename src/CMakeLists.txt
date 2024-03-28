@@ -1,10 +1,13 @@
 # 搜集所有的源文件  
 aux_source_directory(. DIR_SRCS)
 
-# 将源文件编译成静态库  
-add_library(xuanOcpx_core STATIC ${DIR_SRCS})
+# 将Proto源文件添加到DIR_SRCS变量中
+list(APPEND DIR_SRCS ${PROTO_SRCS})
 
-# 为静态库链接所需要的库  
+# 将源文件编译成静态库  
+add_library(xuanOcpx_core STATIC ${DIR_SRCS} ${PROTO_HDRS})
+
+# 为静态库链接所需要的库
 target_link_libraries(xuanOcpx_core
         ${LIBHV}
         ${LOGPP}
@@ -13,6 +16,7 @@ target_link_libraries(xuanOcpx_core
         Threads::Threads
         ${LEVELDB_LIBRARY}
         ${HIREDIS_LIBRARY}
+        ${Protobuf_LIBRARIES}
 )
 
 # 创建可执行文件  

@@ -1,0 +1,63 @@
+syntax = "proto3";
+
+package  tracer;
+
+// 定义用户行为类型的枚举
+enum ActionType {
+    UNKNOWN = 0; // 未知回调类型
+    CLICK = 1; // 点击
+    EXPOSURE = 2; // 展现
+    CALLBACK = 3; // 回调事件
+}
+
+// 定义tracer请求对象的消息格式
+message TracerReq {
+    // 用户行为类型
+    ActionType action = 1;
+    // 对应的链接ID
+    string cqid = 2;
+    // 曝光/点击等行为的ID，唯一对应用户每次操作
+    string action_id = 3;
+    // 请求ID（对应问询参竞请求的ID）
+    string request_id = 4;
+    // RTA ID
+    string rta_id = 5;
+    // 广告主ID
+    string advertiser_id = 6;
+    // 广告计划ID
+    string campaign_id = 7;
+    // 广告ID
+    string ad_id = 8;
+    // 广告创意ID
+    string cid = 9;
+    // 移动设备OS类型，不同平台的os处理不完全一样，此处仅做字符抽取
+    string os = 10;
+    // 安卓IMEI原值
+    string imei = 11;
+    // 安卓IMEI MD5值
+    string imei_md5 = 12;
+    // 安卓OAID原值
+    string oaid = 13;
+    // 安卓OAID MD5值
+    string oaid_md5 = 14;
+    // 安卓AndroidId原值
+    string android_id = 15;
+    // 安卓AndroidId MD5值
+    string android_id_md5 = 16;
+    // IOS IDFA原值
+    string idfa = 17;
+    // IOS IDFA MD5值
+    string idfa_md5 = 18;
+    // 在IOS14后IDFA被禁用后的IOS设备标识（广协标准），原值
+    string caid = 19;
+    // 回调信息，编码一次的URL
+    string callback = 20;
+    // 用户行为时间戳，自1970年起的毫秒数
+    uint64 mts = 21;
+    // 用户IP地址
+    string ip = 22;
+    // 客户端UA，需要Encode一次
+    string ua = 23;
+    // req_get_uri，当此请求完整的url地址
+    string url = 24;
+}

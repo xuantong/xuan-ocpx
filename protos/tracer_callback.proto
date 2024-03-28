@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package tracer;
+
+// 定义业务类型的枚举
+enum BizType {
+    ELEME_CPS = 0;
+    ELEME_FIRST_CALL = 1;
+    MEITUAN_OCPA = 2;
+}
+
+// 定义数据回调的消息格式
+message TracerCall {
+    // 此数据为源请求对应的hash值
+    string id = 1;
+    // 事件类型
+    string event_type = 2;
+    // 回调的具体业务类型
+    BizType biz_type = 3;
+    // 转换类型
+    string transform_type = 4;
+    // 事件时间
+    string event_time = 5;
+    // IP地址
+    string ip = 6;
+}

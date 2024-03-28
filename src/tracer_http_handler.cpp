@@ -19,9 +19,10 @@ int TracerHttpHandler::tracer(HttpRequest *req, HttpResponse *resp) {
 
     // 根据配置文件提取回传数据对象
 
-    return 0;
+    return 200;
 }
 
 int TracerHttpHandler::callback(HttpRequest *req, HttpResponse *resp) {
     logger_.info("TracerHttpHandler callback");
+    return 200;
 }
