@@ -17,6 +17,7 @@
 #include "common_utils.hpp"
 #include "leveldb_wrapper.hpp"
 #include "redis_client.hpp"
+#include "tracer_req.pb.h"
 /**
  * 参考自之前tracer的链接
  * 主接口：/thirdparty/general?action=xxx&cqid=xxx&h1=__ACTION_ID__&h2=__REQUEST_ID__&h3=__RTA_ID__&h4=__ADVERTISER_ID__&h5=__CAMPAIGN_ID__&h6=__AD_ID__&h7=__CID__&h8=__OS__&h9=__IMEI__&h10=__IMEI_MD5__&h11=__OAID__&h12=__OAID_MD5__&h13=__ANDROID_ID__&h14=__ANDROID_ID_MD5__&h15=__IDFA__&h16=__IDFA_MD5__&h17=__CAID__&h18=__CALLBACK__&h19=__ACTION_TYPE__&h20=__MTS__&h21=__MEDIUM_SOURCE__&h22=__IP__&h23=__UA__&valid_event_type=xxx
@@ -52,227 +53,142 @@
 using json = nlohmann::json;
 
 // 定义用户行为类型枚举
-enum class ActionType {
-    Click = 1,   //点击
-    Exposure = 2, //展现
-    CallBack = 3, //回调事件
-    Unknown = -1  //未知回调类型
-};
-
-const std::array<std::underlying_type_t<ActionType>, 3> VALID_ACTIONTYPE_VALUES = {
-        static_cast<std::underlying_type_t<ActionType>>(ActionType::Click),
-        static_cast<std::underlying_type_t<ActionType>>(ActionType::Exposure),
-        static_cast<std::underlying_type_t<ActionType>>(ActionType::CallBack)
+const std::array<std::underlying_type_t<tracer::ActionType>, 3> VALID_ACTIONTYPE_VALUES = {
+    static_cast<std::underlying_type_t<tracer::ActionType>>(tracer::ActionType::CLICK), //点击
+    static_cast<std::underlying_type_t<tracer::ActionType>>(tracer::ActionType::EXPOSURE), //展现
+    static_cast<std::underlying_type_t<tracer::ActionType>>(tracer::ActionType::CALLBACK) //回调
 };
 
 // 定义移动设备OS类型枚举
 enum class OSType {
-    Other = 0,
-    iOS = 1,
-    Android = 2
+  Other = 0,
+  iOS = 1,
+  Android = 2
 };
 
 enum class BizType {
-    ELEME_CPS = 0,
-    ELEME_FIRST_CALL = 1,
-    MEITUAN_OCPA = 2
+  ELEME_CPS = 0,
+  ELEME_FIRST_CALL = 1,
+  MEITUAN_OCPA = 2
 };
 
-/**
- * tracer 请求对象，标准数据请求
- */
-struct TracerReq {
-    // 用户行为类型
-    ActionType action;
-    // 对应的链接ID
-    std::string cqid;
-    // 曝光/点击等行为的ID，唯一对应用户每次操作
-    std::string action_id;
-    // 请求ID（对应问询参竞请求的ID）
-    std::string request_id;
-    // RTA ID
-    std::string rta_id;
-    // 广告主ID
-    std::string advertiser_id;
-    // 广告计划ID
-    std::string campaign_id;
-    // 广告ID
-    std::string ad_id;
-    // 广告创意ID
-    std::string cid;
-    // 移动设备OS类型，不同平台的os处理不完全一样，此处仅做字符抽取
-    std::string os;
-    // 安卓IMEI原值
-    std::string imei;
-    // 安卓IMEI MD5值
-    std::string imei_md5;
-    // 安卓OAID原值
-    std::string oaid;
-    // 安卓OAID MD5值
-    std::string oaid_md5;
-    // 安卓AndroidId原值
-    std::string android_id;
-    // 安卓AndroidId MD5值
-    std::string android_id_md5;
-    // IOS IDFA原值
-    std::string idfa;
-    // IOS IDFA MD5值
-    std::string idfa_md5;
-    // 在IOS14后IDFA被禁用后的IOS设备标识（广协标准），原值
-    std::string caid;
-    // 回调信息，编码一次的URL
-    std::string callback;
-    // 用户行为时间戳，自1970年起的毫秒数
-    uint64_t mts;
-    // 用户IP地址
-    std::string ip;
-    // 客户端UA，需要Encode一次
-    std::string ua;
-    // req_get_uri ,当此请求完整的url地址
-    std::string url;
-};
+inline tracer::TracerReq extract2TracerReqProto(HttpRequest &req) {
+  tracer::TracerReq data;
 
-/**
- * 数据回调的结构体
- */
-struct TracerCall {
-    // 此数据为源请求对应的hash值
-    std::string id;
-    std::string event_type;
-    std::string biz_type; //回调的具体业务类型
-    std::string transform_type; //
-    std::string event_time; //对应为细节
+  // 从HttpRequest中提取参数，并设置到Protobuf消息
+  std::string cqid = req.GetParam("cqid");
+  checkCondition(!cqid.empty(), "Missing required parameter: cqid");
+  data.set_cqid(cqid);
 
-    std::string ip; //ip地址
+  std::string action_str = req.GetParam("action");
+  tracer::ActionType action = EnumUtil::StringToEnum(
+      action_str,
+      tracer::ActionType::UNKNOWN,
+      VALID_ACTIONTYPE_VALUES
+  );
+  checkCondition(action != tracer::ActionType::UNKNOWN,
+                 "Missing required parameter: action, real value is " + action_str);
+  data.set_action(action);
 
-};
+  std::string action_id = req.GetParam("action_id");
+  checkCondition(!action_id.empty(), "Missing required parameter: action_id");
+  data.set_action_id(action_id);
 
-// 为TracerReq结构体定义到json的转换
-static void to_json(json &j, const TracerReq &req) {
-    j = json{
-            {"action",         req.action},
-            {"cqid",           req.cqid},
-            {"action_id",      req.action_id},
-            {"request_id",     req.request_id},
-            {"rta_id",         req.rta_id},
-            {"advertiser_id",  req.advertiser_id},
-            {"campaign_id",    req.campaign_id},
-            {"ad_id",          req.ad_id},
-            {"cid",            req.cid},
-            {"os",             req.os},
-            {"imei",           req.imei},
-            {"imei_md5",       req.imei_md5},
-            {"oaid",           req.oaid},
-            {"oaid_md5",       req.oaid_md5},
-            {"android_id",     req.android_id},
-            {"android_id_md5", req.android_id_md5},
-            {"idfa",           req.idfa},
-            {"idfa_md5",       req.idfa_md5},
-            {"caid",           req.caid},
-            {"callback",       req.callback},
-            {"mts",            req.mts},
-            {"ip",             req.ip},
-            {"ua",             req.ua},
-            {"url",            req.url}
-    };
-}
+  // 设置其他可选参数
+  if (!req.GetParam("request_id").empty()) {
+    data.set_request_id(req.GetParam("request_id"));
+  }
+  if (!req.GetParam("rta_id").empty()) {
+    data.set_rta_id(req.GetParam("rta_id"));
+  }
+  if (!req.GetParam("advertiser_id").empty()) {
+    data.set_advertiser_id(req.GetParam("advertiser_id"));
+  }
+  if (!req.GetParam("campaign_id").empty()) {
+    data.set_campaign_id(req.GetParam("campaign_id"));
+  }
+  if (!req.GetParam("ad_id").empty()) {
+    data.set_ad_id(req.GetParam("ad_id"));
+  }
+  if (!req.GetParam("cid").empty()) {
+    data.set_cid(req.GetParam("cid"));
+  }
+  if (!req.GetParam("os").empty()) {
+    data.set_os(req.GetParam("os"));
+  }
+  if (!req.GetParam("imei").empty()) {
+    data.set_imei(req.GetParam("imei"));
+  }
+  if (!req.GetParam("imei_md5").empty()) {
+    data.set_imei_md5(req.GetParam("imei_md5"));
+  }
+  if (!req.GetParam("oaid").empty()) {
+    data.set_oaid(req.GetParam("oaid"));
+  }
+  if (!req.GetParam("oaid_md5").empty()) {
+    data.set_oaid_md5(req.GetParam("oaid_md5"));
+  }
+  if (!req.GetParam("android_id").empty()) {
+    data.set_android_id(req.GetParam("android_id"));
+  }
+  if (!req.GetParam("android_id_md5").empty()) {
+    data.set_android_id_md5(req.GetParam("android_id_md5"));
+  }
+  if (!req.GetParam("idfa").empty()) {
+    data.set_idfa(req.GetParam("idfa"));
+  }
+  if (!req.GetParam("idfa_md5").empty()) {
+    data.set_idfa_md5(req.GetParam("idfa_md5"));
+  }
+  if (!req.GetParam("caid").empty()) {
+    data.set_caid(req.GetParam("caid"));
+  }
+  if (!req.GetParam("callback").empty()) {
+    data.set_callback(req.GetParam("callback"));
+  }
+  if (!req.GetParam("mts").empty()) {
+    data.set_mts(std::stoull(req.GetParam("mts")));
+  }
+  if (!req.GetParam("ip").empty()) {
+    data.set_ip(req.GetParam("ip"));
+  }
+  if (!req.GetParam("ua").empty()) {
+    data.set_ua(req.GetParam("ua"));
+  }
+  if (!req.GetParam("url").empty()) {
+    data.set_url(req.GetParam("url"));
+  }
 
-static void from_json(const json &j, TracerReq &req) {
-    j.at("action").get_to(req.action);
-    j.at("cqid").get_to(req.cqid);
-    j.at("action_id").get_to(req.action_id);
-    j.at("request_id").get_to(req.request_id);
-    j.at("rta_id").get_to(req.rta_id);
-    j.at("advertiser_id").get_to(req.advertiser_id);
-    j.at("campaign_id").get_to(req.campaign_id);
-    j.at("ad_id").get_to(req.ad_id);
-    j.at("cid").get_to(req.cid);
-    j.at("os").get_to(req.os);
-    j.at("imei").get_to(req.imei);
-    j.at("imei_md5").get_to(req.imei_md5);
-    j.at("oaid").get_to(req.oaid);
-    j.at("oaid_md5").get_to(req.oaid_md5);
-    j.at("android_id").get_to(req.android_id);
-    j.at("android_id_md5").get_to(req.android_id_md5);
-    j.at("idfa").get_to(req.idfa);
-    j.at("idfa_md5").get_to(req.idfa_md5);
-    j.at("caid").get_to(req.caid);
-    j.at("callback").get_to(req.callback);
-    j.at("mts").get_to(req.mts);
-    j.at("ip").get_to(req.ip);
-    j.at("ua").get_to(req.ua);
-    j.at("uri").get_to(req.url);
-}
-
-inline TracerReq extractTracerReq(HttpRequest &req) {
-    TracerReq data;
-    // cqid和action_id是必传参数，如果没有提供，抛出异常
-    data.cqid = req.GetParam("cqid");
-    checkCondition(!data.cqid.empty(), "Missing required parameter: cqid");
-
-    data.action = EnumUtil::StringToEnum(
-            req.GetParam("action"),
-            ActionType::Unknown,
-            VALID_ACTIONTYPE_VALUES
-    );
-
-    checkCondition(data.action != ActionType::Unknown,
-                   "Missing required parameter: action ,real value is " + req.GetParam("action"));
-
-    data.action_id = req.GetParam("action_id");
-    data.request_id = req.GetParam("request_id");
-    data.rta_id = req.GetParam("rta_id");
-    data.advertiser_id = req.GetParam("advertiser_id");
-    data.campaign_id = req.GetParam("campaign_id");
-    data.ad_id = req.GetParam("ad_id");
-    data.cid = req.GetParam("cid");
-    data.os = req.GetParam("os");
-    data.imei = req.GetParam("imei");
-    data.imei_md5 = req.GetParam("imei_md5");
-    data.oaid = req.GetParam("oaid");
-    data.oaid_md5 = req.GetParam("oaid_md5");
-    data.android_id = req.GetParam("android_id");
-    data.android_id_md5 = req.GetParam("android_id_md5");
-    data.idfa = req.GetParam("idfa");
-    data.idfa_md5 = req.GetParam("idfa_md5");
-    data.caid = req.GetParam("caid");
-    data.callback = req.GetParam("callback");
-    data.mts = std::stoull(req.GetParam("mts", "0"));
-    data.ip = req.GetParam("ip");
-    data.ua = req.GetParam("ua");
-    data.url = req.url;
-
-    return data;
+  return data;
 }
 
 class TracerHttpHandler {
-private:
-    static logpp::Logger logger_;
-    LevelDBWrapper &level_db_wrapper_;
-    RedisClient &redisClient_;
+ private:
+  static logpp::Logger logger_;
+  LevelDBWrapper &level_db_wrapper_;
+  RedisClient &redisClient_;
 
+ public:
+  TracerHttpHandler(LevelDBWrapper &level_db_wrapper, RedisClient &redisClient) : level_db_wrapper_(level_db_wrapper),
+                                                                                  redisClient_(redisClient) {}
 
-public:
-    TracerHttpHandler(LevelDBWrapper &level_db_wrapper, RedisClient &redisClient) : level_db_wrapper_(level_db_wrapper),
-                                                                                    redisClient_(redisClient) {}
+  ~TracerHttpHandler() = default;
 
-    ~TracerHttpHandler() = default;
+  /**
+   * 数据初步跟踪逻辑
+   * @param req
+   * @param resp
+   * @return
+   */
+  int tracer(HttpRequest *req, HttpResponse *resp);
 
-    /**
-     * 数据初步跟踪逻辑
-     * @param req
-     * @param resp
-     * @return
-     */
-    int tracer(HttpRequest *req, HttpResponse *resp);
-
-    /**
-     * 数据回调逻辑
-     * @param req
-     * @param resp
-     * @return
-     */
-    int callback(HttpRequest *req, HttpResponse *resp);
+  /**
+   * 数据回调逻辑
+   * @param req
+   * @param resp
+   * @return
+   */
+  int callback(HttpRequest *req, HttpResponse *resp);
 };
 
 #endif //XUANOCPX_TRACER_HTTP_HANDLER_H

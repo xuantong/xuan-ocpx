@@ -7,14 +7,14 @@
 #include "string_utils.h"
 
 TEST(EnumUtil, StringToEnum) {
-    EXPECT_EQ(EnumUtil::StringToEnum("1", ActionType::Unknown, VALID_ACTIONTYPE_VALUES),
-              ActionType::Click);
-    EXPECT_EQ(EnumUtil::StringToEnum("2", ActionType::Unknown, VALID_ACTIONTYPE_VALUES),
-              ActionType::Exposure);
-    EXPECT_EQ(EnumUtil::StringToEnum("3", ActionType::Unknown, VALID_ACTIONTYPE_VALUES),
-              ActionType::CallBack);
-    EXPECT_EQ(EnumUtil::StringToEnum("4", ActionType::Unknown, VALID_ACTIONTYPE_VALUES),
-              ActionType::Unknown);
-    EXPECT_EQ(EnumUtil::StringToEnum(string_utils::randomString(5), ActionType::Unknown, VALID_ACTIONTYPE_VALUES),
-              ActionType::Unknown);
+    EXPECT_EQ(EnumUtil::StringToEnum("1", tracer::ActionType::UNKNOWN, VALID_ACTIONTYPE_VALUES),
+              tracer::ActionType::CLICK);
+    EXPECT_EQ(EnumUtil::StringToEnum("2", tracer::ActionType::UNKNOWN, VALID_ACTIONTYPE_VALUES),
+              tracer::ActionType::EXPOSURE);
+    EXPECT_EQ(EnumUtil::StringToEnum("3", tracer::ActionType::UNKNOWN, VALID_ACTIONTYPE_VALUES),
+              tracer::ActionType::CALLBACK);
+    EXPECT_EQ(EnumUtil::StringToEnum("4", tracer::ActionType::UNKNOWN, VALID_ACTIONTYPE_VALUES),
+              tracer::ActionType::UNKNOWN);
+    EXPECT_EQ(EnumUtil::StringToEnum(string_utils::randomString(5), tracer::ActionType::UNKNOWN, VALID_ACTIONTYPE_VALUES),
+              tracer::ActionType::UNKNOWN);
 }
