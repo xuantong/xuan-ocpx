@@ -40,29 +40,8 @@ if (PROTOBUF_FOUND)
 else ()
     message(FATAL_ERROR "Cannot find Protobuf library.")
 endif ()
-
-# 设置 proto 文件
-file(GLOB PROTO_FILES "${CMAKE_CURRENT_SOURCE_DIR}/protos/*.proto")
-#protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
-
-message(STATUS "PROTO_FILES is ${PROTO_FILES}")
-
-# 手动调用protoc编译器生成Proto源文件和头文件
-foreach (PROTO_FILE ${PROTO_FILES})
-    get_filename_component(PROTO_NAME_WE ${PROTO_FILE} NAME_WE)
-    set(PROTO_SRC "${CMAKE_CURRENT_BINARY_DIR}/${PROTO_NAME_WE}.pb.cc")
-    set(PROTO_HDR "${CMAKE_CURRENT_BINARY_DIR}/${PROTO_NAME_WE}.pb.h")
-    set(PROTOC_COMMAND "${PROTOBUF_PROTOC_EXECUTABLE} --cpp_out ${CMAKE_CURRENT_BINARY_DIR} --proto_path ${CMAKE_CURRENT_SOURCE_DIR}/protos ${PROTO_FILE}")
-    message(STATUS "Protoc Command: ${PROTOC_COMMAND}")
-
-    add_custom_command(
-            OUTPUT ${PROTO_SRC} ${PROTO_HDR}
-            COMMAND ${PROTOC_COMMAND}
-            DEPENDS ${PROTO_FILE}
-            COMMENT "Running C++ protocol buffer compiler on ${PROTO_FILE}"
-            VERBATIM
-    )
-endforeach ()
+# 设置自动生成的代码的输出路径
+set(PROTO_OUTPUT_PATH "${CMAKE_CURRENT_BINARY_DIR}/protos")
 
 include_directories(
         /usr/local/include
@@ -73,8 +52,10 @@ include_directories(
         ${Protobuf_INCLUDE_DIRS}
         # 包含生成的*.pb.h文件的目录
         ${CMAKE_CURRENT_BINARY_DIR}
+        ${PROTO_OUTPUT_PATH}
 )
 
 # 包含子目录
+add_subdirectory(protos)
 add_subdirectory(src)
 add_subdirectory(test)

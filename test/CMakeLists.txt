@@ -9,7 +9,10 @@ find_package(GTest REQUIRED)
 include_directories(${GTEST_INCLUDE_DIRS})
 
 # 添加本项目的头文件目录，这允许测试代码包含项目中的头文件。
-include_directories(${PROJECT_SOURCE_DIR}/include)
+include_directories(
+        ${PROJECT_SOURCE_DIR}/include
+        ${PROTO_OUTPUT_PATH}
+)
 
 # 创建一个名为 main_test 的可执行文件，包含以下两个源文件。
 add_executable(main_test
@@ -31,6 +34,9 @@ target_link_libraries(main_test
         GTest::Main
         OpenSSL::SSL
         ${LEVELDB_LIBRARY}
+        ${PROTOBUF_LIBRARIES}
+        tracer_callback_proto # 假设您有一个tracer_callback.proto文件
+        tracer_req_proto      # 假设您有一个tracer_req.proto文件
         pthread
 )
 
