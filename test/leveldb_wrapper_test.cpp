@@ -5,6 +5,7 @@
 #include <gtest/gtest.h>
 #include <filesystem>
 #include "string_utils.h"
+#include "tracer_req.pb.h"
 
 namespace {
 
@@ -77,6 +78,35 @@ TEST_F(LevelDBWrapperTest, WriteBatch) {
     EXPECT_NO_THROW(value = db_wrapper->Get(pair.first));
     EXPECT_EQ(pair.second, value);
   }
+}
+// 测试Protobuf Put和Get。
+TEST_F(LevelDBWrapperTest, PutAndGetProtobuf) {
+  tracer::TracerReq original_msg;
+  original_msg.set_android_id("Test Android ID");
+  original_msg.set_action_id(string_utils::randomString(5));
+  original_msg.set_action(tracer::ActionType::CLICK);
+
+  // 序列化protobuf消息。
+  std::string serialized;
+  ASSERT_TRUE(original_msg.SerializeToString(&serialized));
+
+  // 定义一个键用于LevelDB存储。
+  std::string key = string_utils::hash(serialized);
+
+  // 存储序列化的protobuf字符串到LevelDB。
+  db_wrapper->Put(key, serialized);
+
+  // 从LevelDB读取序列化的protobuf字符串。
+  std::string retrieved_serialized = db_wrapper->Get(key);
+
+  // 反序列化字符串到protobuf消息。
+  tracer::TracerReq retrieved_msg;
+  ASSERT_TRUE(retrieved_msg.ParseFromString(retrieved_serialized));
+
+  // 验证原始消息和检索的消息是否一致。
+  EXPECT_EQ(original_msg.android_id(), retrieved_msg.android_id());
+  EXPECT_EQ(original_msg.action_id(), retrieved_msg.action_id());
+  EXPECT_EQ(original_msg.action(), retrieved_msg.action());
 }
 
 }  // namespace
