@@ -20,6 +20,8 @@ target_link_libraries(xuanOcpx_core
         ${LEVELDB_LIBRARY}
         ${HIREDIS_LIBRARY}
         ${PROTOBUF_LIBRARIES}
+        tracer_callback_proto # proto file
+        tracer_req_proto
 )
 
 # 创建可执行文件  

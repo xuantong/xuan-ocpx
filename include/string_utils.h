@@ -72,5 +72,13 @@ namespace string_utils {
      * @return
      */
     std::string hash(const std::string &value);
+
+    /**
+     * 固定截断字符，用于输出使用
+     * @param str 源字符串
+     * @param max_length 截断长度
+     * @return
+     */
+    std::string truncate_string(const std::string &str, size_t max_length = 256);
 }
 #endif //SPM_PLATE_STRING_UTILS_HPP

@@ -3,6 +3,7 @@
 //
 
 #include "string_utils.h"
+
 namespace string_utils {
     // 将盐穿插到数据中的函数
     std::string interleaveSaltWithData(const std::string &data, const std::string &salt) {
@@ -22,7 +23,6 @@ namespace string_utils {
 
         return result;
     }
-
 
     // 生成带盐的MD5哈希值的函数
     std::string generateMD5HashWithInterleavedSalt(const std::string &data, const std::string &salt) {
@@ -88,5 +88,12 @@ namespace string_utils {
             ss << std::hex << std::setw(8) << std::setfill('0') << hash[i];
         }
         return ss.str();
+    }
+
+    std::string truncate_string(const std::string &str, size_t max_length) {
+        if (str.length() > max_length && max_length >= 3) {
+            return str.substr(0, max_length - 3) + "...";
+        }
+        return str;
     }
 }
