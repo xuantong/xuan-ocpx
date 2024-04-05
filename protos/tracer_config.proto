@@ -1,0 +1,8 @@
+syntax = "proto3";
+
+package  tracer;
+
+// 定义tracer请求对象的消息格式
+message TracerConfig {
+
+}
