@@ -18,6 +18,7 @@
 #include "leveldb_wrapper.hpp"
 #include "redis_client.hpp"
 #include "tracer_req.pb.h"
+#include "tracer_callback.pb.h"
 /**
  * 参考自之前tracer的链接
  * 主接口：/thirdparty/general?action=xxx&cqid=xxx&h1=__ACTION_ID__&h2=__REQUEST_ID__&h3=__RTA_ID__&h4=__ADVERTISER_ID__&h5=__CAMPAIGN_ID__&h6=__AD_ID__&h7=__CID__&h8=__OS__&h9=__IMEI__&h10=__IMEI_MD5__&h11=__OAID__&h12=__OAID_MD5__&h13=__ANDROID_ID__&h14=__ANDROID_ID_MD5__&h15=__IDFA__&h16=__IDFA_MD5__&h17=__CAID__&h18=__CALLBACK__&h19=__ACTION_TYPE__&h20=__MTS__&h21=__MEDIUM_SOURCE__&h22=__IP__&h23=__UA__&valid_event_type=xxx
@@ -54,11 +55,16 @@ using json = nlohmann::json;
 
 // 定义用户行为类型枚举
 const std::array<std::underlying_type_t<tracer::ActionType>, 3> VALID_ACTIONTYPE_VALUES = {
-    static_cast<std::underlying_type_t<tracer::ActionType>>(tracer::ActionType::CLICK), //点击
-    static_cast<std::underlying_type_t<tracer::ActionType>>(tracer::ActionType::EXPOSURE), //展现
-    static_cast<std::underlying_type_t<tracer::ActionType>>(tracer::ActionType::CALLBACK) //回调
+    static_cast<std::underlying_type_t<tracer::ActionType>>(tracer::ActionType::CLICK_ACTION), //点击
+    static_cast<std::underlying_type_t<tracer::ActionType>>(tracer::ActionType::EXPOSURE_ACTION), //展现
+    static_cast<std::underlying_type_t<tracer::ActionType>>(tracer::ActionType::CALLBACK_ACTION) //回调
 };
 
+const std::array<std::underlying_type_t<tracer::BizType>, 3> VALID_BIZTYPE_VALUES = {
+    static_cast<std::underlying_type_t<tracer::BizType>>(tracer::BizType::BIZTYPE_ELEME_CPS), //点击
+    static_cast<std::underlying_type_t<tracer::BizType>>(tracer::BizType::BIZTYPE_ELEME_FIRST_CALL), //展现
+    static_cast<std::underlying_type_t<tracer::BizType>>(tracer::BizType::BIZTYPE_MEITUAN_OCPA) //回调
+};
 // 定义移动设备OS类型枚举
 enum class OSType {
   Other = 0,
@@ -83,10 +89,10 @@ inline tracer::TracerReq extract2TracerReqProto(HttpRequest &req) {
   std::string action_str = req.GetParam("action");
   tracer::ActionType action = EnumUtil::StringToEnum(
       action_str,
-      tracer::ActionType::UNKNOWN,
+      tracer::ActionType::UNKNOWN_ACTION,
       VALID_ACTIONTYPE_VALUES
   );
-  checkCondition(action != tracer::ActionType::UNKNOWN,
+  checkCondition(action != tracer::ActionType::UNKNOWN_ACTION,
                  "Missing required parameter: action, real value is " + action_str);
   data.set_action(action);
 
@@ -158,6 +164,43 @@ inline tracer::TracerReq extract2TracerReqProto(HttpRequest &req) {
   if (!req.GetParam("url").empty()) {
     data.set_url(req.GetParam("url"));
   }
+
+  return data;
+}
+
+inline tracer::TracerCallBack extract2TracerCallBackReqProto(HttpRequest &req) {
+  tracer::TracerCallBack data;
+
+  // 从HttpRequest中提取参数，并设置到Protobuf消息
+  std::string id = req.GetParam("id");
+  checkCondition(!id.empty(), "Missing required parameter: id");
+  data.set_id(id);
+
+  std::string event_type = req.GetParam("event_type");
+  checkCondition(!event_type.empty(), "Missing required parameter: event_type");
+  data.set_event_type(event_type);
+
+  std::string biz_type = req.GetParam("biz_type");
+  tracer::BizType biz_type_enum = EnumUtil::StringToEnum(
+      biz_type,
+      tracer::BizType::BIZTYPE_UNKNOWN,
+      VALID_BIZTYPE_VALUES
+  );
+  checkCondition(biz_type_enum != tracer::BizType::BIZTYPE_UNKNOWN,
+                 "Missing required parameter: action, real value is " + biz_type);
+  data.set_biz_type(biz_type_enum);
+
+  std::string transform_type = req.GetParam("transform_type");
+  checkCondition(!transform_type.empty(), "Missing required parameter: transform_type");
+  data.set_transform_type(transform_type);
+
+  std::string event_time = req.GetParam("event_time");
+  checkCondition(!event_time.empty(), "Missing required parameter: event_time");
+  data.set_event_time(event_time);
+
+  std::string ip = req.GetParam("ip");
+  checkCondition(!ip.empty(), "Missing required parameter: ip");
+  data.set_ip(ip);
 
   return data;
 }

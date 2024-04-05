@@ -25,5 +25,6 @@ int TracerHttpHandler::tracer(HttpRequest *req, HttpResponse *resp) {
 
 int TracerHttpHandler::callback(HttpRequest *req, HttpResponse *resp) {
     logger_.info("TracerHttpHandler callback");
+
     return 200;
 }
