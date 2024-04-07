@@ -4,10 +4,10 @@ package  tracer;
 
 // 定义用户行为类型的枚举
 enum ActionType {
-    UNKNOWN = 0; // 未知回调类型
-    CLICK = 1; // 点击
-    EXPOSURE = 2; // 展现
-    CALLBACK = 3; // 回调事件
+    UNKNOWN_ACTION = 0; // 未知回调类型
+    CLICK_ACTION = 1; // 点击
+    EXPOSURE_ACTION = 2; // 展现
+    CALLBACK_ACTION = 3; // 回调事件
 }
 
 // 定义tracer请求对象的消息格式

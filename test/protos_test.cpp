@@ -21,7 +21,7 @@ TEST_F(ProtoTest, SetterGetter) {
   msg.set_action_id(action_id);
   EXPECT_EQ(action_id, msg.action_id());
   EXPECT_TRUE(msg.android_id_md5().empty()); // 如果android_id_md5是字符串类型，未设置时应该为空字符串
-  EXPECT_EQ(tracer::ActionType::UNKNOWN, msg.action()); // 枚举设置为默认的0
+  EXPECT_EQ(tracer::ActionType::UNKNOWN_ACTION, msg.action()); // 枚举设置为默认的0
 }
 
 TEST_F(ProtoTest, Serialization) {

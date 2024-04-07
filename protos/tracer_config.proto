@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+package com.tracer.dal.entity;
+
+import "google/protobuf/any.proto";
+
+// 投放广告链接配置策略
+message AdLinkConfig {
+    // 基础实体字段可以根据实际情况添加，比如id, createdAt, updatedAt等
+
+    // 流量名称
+    string name = 1;
+
+    // 配置状态
+    AdLinkConfigStatus status = 2;
+
+    // 流量平台标识
+    TrafficPlatformEnum traffic_platform = 3;
+
+    // 业务逻辑端
+    BizType biz_type = 4;
+
+    // 最大重试次数，默认值为5
+    int32 max_retry_count = 5;
+
+    // 扩展字段，用于存储业务特性化字段
+    google.protobuf.Any ext_info = 6;
+}
+
+// 配置状态枚举
+enum AdLinkConfigStatus {
+    // 枚举值需要根据Java类中定义的实际值来设置
+    UNKNOWN = 0;
+    ACTIVE = 1;
+    INACTIVE = 2;
+    // ... 其他状态
+}
+
+// 流量平台枚举
+enum TrafficPlatformEnum {
+    // 枚举值需要根据Java类中定义的实际值来设置
+    UNKNOWN_PLATFORM = 0;
+    PLATFORM_A = 1;
+    PLATFORM_B = 2;
+    // ... 其他平台
+}
+
+// 业务逻辑端枚举
+enum BizType {
+    // 枚举值需要根据Java类中定义的实际值来设置
+    UNKNOWN_BIZ_TYPE = 0;
+    BIZ_TYPE_A = 1;
+    BIZ_TYPE_B = 2;
+    // ... 其他业务逻辑端
+}

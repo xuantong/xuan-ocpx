@@ -84,7 +84,7 @@ TEST_F(LevelDBWrapperTest, PutAndGetProtobuf) {
   tracer::TracerReq original_msg;
   original_msg.set_android_id("Test Android ID");
   original_msg.set_action_id(string_utils::randomString(5));
-  original_msg.set_action(tracer::ActionType::CLICK);
+  original_msg.set_action(tracer::ActionType::CLICK_ACTION);
 
   // 序列化protobuf消息。
   std::string serialized;
