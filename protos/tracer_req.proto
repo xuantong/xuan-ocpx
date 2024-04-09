@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package  tracer;
+package  tracer.req;
 
 // 定义用户行为类型的枚举
 enum ActionType {
