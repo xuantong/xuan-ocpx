@@ -35,9 +35,9 @@ target_link_libraries(main_test
         OpenSSL::SSL
         ${LEVELDB_LIBRARY}
         ${PROTOBUF_LIBRARIES}
-        tracer_callback_proto # 假设您有一个tracer_callback.proto文件
-        tracer_req_proto      # 假设您有一个tracer_req.proto文件
-        tracer_config      # 假设您有一个tracer_req.proto文件
+        tracer_callback_proto
+        tracer_req_proto
+        tracer_config
         pthread
 )
 
