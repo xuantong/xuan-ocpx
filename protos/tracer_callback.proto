@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package tracer;
+package tracer.callback;
 
 // 定义业务类型的枚举
 enum BizType {

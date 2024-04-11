@@ -35,8 +35,9 @@ target_link_libraries(main_test
         OpenSSL::SSL
         ${LEVELDB_LIBRARY}
         ${PROTOBUF_LIBRARIES}
-        tracer_callback_proto # proto file
+        tracer_callback_proto
         tracer_req_proto
+        tracer_config
         pthread
 )
 
