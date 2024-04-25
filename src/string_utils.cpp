@@ -79,6 +79,27 @@ namespace string_utils {
         return escaped.str();
     }
 
+    std::string urlDecode(const std::string &value) {
+        std::ostringstream decoded;
+        size_t i = 0;
+        while (i < value.length()) {
+            if (value[i] == '%' && i + 2 < value.length()) {
+                // 提取两个字符的十六进制字符串
+                std::string hex_str = value.substr(i + 1, 2);
+                char decoded_char = static_cast<char>(strtol(hex_str.c_str(), nullptr, 16));
+                decoded << decoded_char;
+                i += 3; // 跳过当前的百分号和两个十六进制字符
+            } else if (value[i] == '+') { // 处理空格
+                decoded << ' ';
+                i++;
+            } else {
+                decoded << value[i++];
+            }
+        }
+        return decoded.str();
+    }
+
+
     std::string hash(const std::string &value) {
         const char *key = value.c_str();
         uint32_t hash[4];

@@ -17,6 +17,7 @@
 #include <ctime>
 #include <iomanip>
 #include "MurmurHash3.h"
+#include "assert.h"
 
 namespace string_utils {
     static const char DEFAULT_DELIMITER = ',';
@@ -65,6 +66,14 @@ namespace string_utils {
      * @return
      */
     std::string urlEncode(const std::string &value);
+
+
+    /**
+     * url decode
+     * @param value
+     * @return
+     */
+    std::string urlDecode(const std::string &value);
 
     /**
      * 生成对应字符的hash数据

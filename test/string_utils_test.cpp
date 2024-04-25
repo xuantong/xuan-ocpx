@@ -12,6 +12,14 @@ TEST(string_utils_test, urlEncode) {
     ASSERT_EQ(expected, urlEncode(original));
 }
 
+TEST(string_utils_test, urlDecode) {
+    std::string data = "%E4%B8%AD%E5%9B%BD%E6%9C%89%E5%A4%9A%E5%B0%91%E4%B8%AA%E7%9C%81%E5%95%8A2";
+    std::string expected = "中国有多少个省啊2";
+    ASSERT_EQ(expected, urlDecode(data));
+    std::string expected2 = "wo是中国人2啊是不是bbc一直好用。";
+    ASSERT_EQ(expected2, urlDecode(urlEncode(expected2)));
+}
+
 TEST(string_utils_test, randomString) {
     for (int i = 10; i < 20; ++i) {
         std::string expected = randomString(i);
