@@ -19,6 +19,9 @@
 #include "redis_client.hpp"
 #include "tracer_req.pb.h"
 #include "tracer_callback.pb.h"
+#include "tracer_config.pb.h"
+#include "macro_variable_util.hpp"
+
 /**
  * 参考自之前tracer的链接
  * 主接口：/thirdparty/general?action=xxx&cqid=xxx&h1=__ACTION_ID__&h2=__REQUEST_ID__&h3=__RTA_ID__&h4=__ADVERTISER_ID__&h5=__CAMPAIGN_ID__&h6=__AD_ID__&h7=__CID__&h8=__OS__&h9=__IMEI__&h10=__IMEI_MD5__&h11=__OAID__&h12=__OAID_MD5__&h13=__ANDROID_ID__&h14=__ANDROID_ID_MD5__&h15=__IDFA__&h16=__IDFA_MD5__&h17=__CAID__&h18=__CALLBACK__&h19=__ACTION_TYPE__&h20=__MTS__&h21=__MEDIUM_SOURCE__&h22=__IP__&h23=__UA__&valid_event_type=xxx

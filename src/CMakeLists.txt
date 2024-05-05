@@ -22,6 +22,7 @@ target_link_libraries(xuanOcpx_core
         ${PROTOBUF_LIBRARIES}
         tracer_callback_proto
         tracer_req_proto
+        tracer_config_proto
 )
 
 # 创建可执行文件  

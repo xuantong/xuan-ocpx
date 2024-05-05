@@ -37,7 +37,7 @@ target_link_libraries(main_test
         ${PROTOBUF_LIBRARIES}
         tracer_callback_proto
         tracer_req_proto
-#        tracer_config
+        tracer_config_proto
         pthread
 )
 

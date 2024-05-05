@@ -12,18 +12,19 @@
 #include <algorithm>
 #include <random>
 
-
 bool isMacroVariable(const std::string &value) {
   // 判断是否是宏变量，具体实现依赖于宏变量的定义
   return value.find("__") != std::string::npos;
 }
 
-// 以下是 MacroVariableUtil 类的简化版本
 class MacroVariableUtil {
  public:
   // 使用宏变量替换模板链接
-  static std::string replace(const std::string &templateLink,
-                             const std::unordered_map<std::string, std::string> &variableMaps) {
+  // SFINAE（Substitution Failure Is Not An Error）
+  // 避免传入的参数不是std::unordered_map/std::map类型
+  template<typename MapType>
+  static auto replace(const std::string &templateLink, const MapType &variableMaps)
+  -> decltype(variableMaps.begin()->first, variableMaps.begin()->second, std::string()) {
     std::string result = templateLink;
     for (const auto &pair : variableMaps) {
       std::string macro = "__" + pair.first + "__";
