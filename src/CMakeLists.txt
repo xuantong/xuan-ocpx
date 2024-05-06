@@ -26,7 +26,8 @@ target_link_libraries(xuanOcpx_core
 )
 
 # 创建可执行文件  
-add_executable(${PROJECT_NAME} main.cpp)
+add_executable(${PROJECT_NAME} main.cpp
+        ../include/http_client_pools.h)
 
 # 将核心静态库链接到可执行文件  
 target_link_libraries(${PROJECT_NAME}

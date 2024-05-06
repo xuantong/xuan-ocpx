@@ -43,10 +43,13 @@ int TracerHttpHandler::tracer(HttpRequest *req, HttpResponse *resp) {
 }
 
 int TracerHttpHandler::callback(HttpRequest *req, HttpResponse *resp) {
-  logger_.info("TracerHttpHandler callback");
-  tracer::callback::TracerCallBack tracerCallbackReq = extract2TracerCallBackReqProto(*req);
-  std::unique_ptr<tracer::req::TracerReq>
-      tracerReq = level_db_wrapper_.ProtoBufGet<tracer::req::TracerReq>(tracerCallbackReq.id());
+    logger_.info("TracerHttpHandler callback");
+    tracer::callback::TracerCallBack tracerCallbackReq = extract2TracerCallBackReqProto(*req);
+    std::unique_ptr<tracer::req::TracerReq> tracerReq = level_db_wrapper_.ProtoBufGet<tracer::req::TracerReq>(tracerCallbackReq.id());
+    if (tracerReq == nullptr) {
+        logger_.error("TracerHttpHandler callback tracerReq is null");
+        return 500;
+    }
 
-  return 200;
+    return 200;
 }
