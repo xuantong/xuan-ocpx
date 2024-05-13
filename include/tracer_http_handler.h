@@ -8,6 +8,7 @@
 
 #include "hv/HttpService.h"
 #include "hv/HttpMessage.h"
+#include "hv/requests.h"
 #include "hv/json.hpp"
 #include <string>
 #include <logpp/logpp.hpp>
@@ -52,6 +53,8 @@
  * h23:__UA__				客户端UA，需要Encode一次
  * valid_event_type:		认可的转化类型：1激活2唤端UV 3成单
  */
+
+using namespace hv;
 
 // 使用nlohmann::json命名空间
 using json = nlohmann::json;
